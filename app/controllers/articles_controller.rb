@@ -1,17 +1,17 @@
 class ArticlesController < ApplicationController
   def index
     articles = Article.all
-    render json: articles, status: 200
+    render json: articles, status: 
   end
 
   def show
     article = Article.find_by(id: params[:id])
     if article
-      render json: article, status: 200
+      render json: article
     else
       render json: {
         error: "Article Not Found"
-      }
+      } 
     end
   end
 
@@ -21,11 +21,13 @@ class ArticlesController < ApplicationController
     )
 
     if article.save
-      render json: article, status: 200
+      render json: article
     else
       render json: {
-        error: "Error Creating"
-      }
+        error: article.errors.full_messages
+
+      },
+      status: :bad_request
     end
   end
 
@@ -36,8 +38,8 @@ class ArticlesController < ApplicationController
       render json: "Article updated successfully"
     else
       render json: {
-        error: "Article Not Found"
-      }
+        error: article.errors.full_messages
+      },status: :bad_request
     end
   end
 
@@ -48,8 +50,8 @@ class ArticlesController < ApplicationController
       render json: "Article deleted successfully"
     else
       render json: {
-        error: "Article Not Found"
-      }
+        error: article.errors.full_messages
+      },status: :bad_request
     end
   end
 
