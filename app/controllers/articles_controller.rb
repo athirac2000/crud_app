@@ -1,65 +1,57 @@
 class ArticlesController < ApplicationController
+  before_action :find_arti, only: [:show, :update, :destroy]
+  
   def index
     articles = Article.all
-    render json: articles, status: 200
+    if articles.empty?
+      render json: { message: "No articles found" }, status: :not_found
+    else
+      render json: articles
+    end
   end
 
   def show
-    article = Article.find_by(id: params[:id])
-    if article
-      render json: article, status: 200
+    if @article
+      render json: @article
     else
-      render json: {
-        error: "Article Not Found"
-      }
+      render json: { success: false, message: "Article Not Found" }, status: :not_found
     end
   end
 
   def create
-    article = Article.new(
-      arti_params
-    )
-
-    if article.save
-      render json: article, status: 200
+    article = Article.create(arti_params)
+    if article.errors.any?
+      render json: { success: false, message: article.errors.full_messages }, status: :bad_request
     else
-      render json: {
-        error: "Error Creating"
-      }
+      render json: { success: true, message: "Article created" }
     end
   end
 
   def update
-    article = Article.find_by(id: params[:id])
-    if article
-      article.update(arti_params)
-      render json: "Article updated successfully"
+    if @article
+      @article.update(arti_params)
+      render json: { success: true, message: "Article updated successfully" }
     else
-      render json: {
-        error: "Article Not Found"
-      }
+      render json: { success: false, message: "Article not found" }, status: :not_found
     end
   end
 
   def destroy
-    article = Article.find_by(id: params[:id])
-    if article
-      article.destroy
-      render json: "Article deleted successfully"
+    if @article
+      @article.destroy
+      render json: { success: true, message: "Article deleted successfully" }
     else
-      render json: {
-        error: "Article Not Found"
-      }
+      render json: { success: false, message: "Article not found" }, status: :not_found
     end
   end
 
   private
 
   def arti_params
-    params.require(:article).permit([
-      :title,
-      :body,
-      :author
-    ])
+    params.require(:article).permit(:title, :body, :author)
+  end
+
+  def find_arti
+    @article = Article.find_by(id: params[:id])
   end
 end
